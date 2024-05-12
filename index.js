@@ -398,11 +398,9 @@ const addUserToDB = async (username, fname, lname, uuid) => {
       },
     });
     logger.info('User added to DB successfully')
-    logger.verbose(objectToString(response));
     return success;
   } catch (error) {
-    logger.error('Error adding user to the DB')
-    logger.verbose(objectToString(error));
+    logger.error('adding user to the DB')
     success = false;
     return success;
   }
