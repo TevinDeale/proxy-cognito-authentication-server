@@ -165,7 +165,7 @@ app.get("/signout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       logger.error(`There was a error destroying session: ${err}`)
-      return res.status(500);
+      return res.status(500).json({ msg: "Error signing out"});
     }
 
     logger.info('Clearing cookies')
@@ -176,7 +176,7 @@ app.get("/signout", (req, res) => {
     logger.info('Running deleteSessionFromDDB')
     deleteSessionFromDDB(req.sessionID)
     logger.info('Session successfully destroyed')
-    res.status(200);
+    res.status(200).json({ msg: "Successfully logged out"});
   });
 });
 
@@ -237,7 +237,9 @@ app.use(
     on: {
         proxyReq: (proxyReq, req, res) => {
             logger.info(`Body of req going to proxy: ${objectToString(req.body)}`);
-            proxyReq.setHeader('authorization',req.headers['Authorization'])
+            if (req.headers['Authorization']) {
+              proxyReq.setHeader('authorization',req.headers['Authorization'])
+            }
             proxyReq.write(JSON.stringify(req.body))
         }
     }
@@ -250,6 +252,16 @@ app.listen(PORT, HOST, () => {
 });
 // END API MIDDLEWARE
 
+//AWS CLIENT CONFIG
+const awsClientConfig = {
+  region: region,
+  logger: logger,
+  credentials: {
+    accessKeyId: env.AWSACCESSKEY,
+    secretAccessKey: env.AWSSECRETKEY
+  }
+}
+
 //AWS Cognito SDK METHODS
 const {
   CognitoIdentityProviderClient,
@@ -257,7 +269,7 @@ const {
   SignUpCommand,
   AdminDeleteUserCommand,
 } = require("@aws-sdk/client-cognito-identity-provider");
-const client = new CognitoIdentityProviderClient({ region: region, logger: logger });
+const client = new CognitoIdentityProviderClient(awsClientConfig);
 
 const signIn = async (username, password) => {
   logger.info('Starting sign-in method')
@@ -429,10 +441,7 @@ const adminDeleteUser = async (username) => {
 // AWS DynamoDB SDK Methods
 logger.info('Setting up DynamoDB SDK')
 const { GetItemCommand, PutItemCommand, DynamoDBClient, DeleteItemCommand } = require("@aws-sdk/client-dynamodb");
-const dynamodbClient = new DynamoDBClient({
-  region: region,
-  logger: logger,
-})
+const dynamodbClient = new DynamoDBClient(awsClientConfig)
 
 const addSessionToDDB = async (sessionID, accessToken, idToken, refreshToken, uuid, exp) => {
   let success = false
@@ -558,4 +567,30 @@ const cleanUpUsers = async (users) => {
     })
 }
 //END OF CLEANUP
+
+//Test connection to API
+const testAPIConnection = async () => {
+  logger.info('Checking API Connection')
+
+  try {
+    const response = await axios({
+    method: "get",
+    url: API_SERVICE_URL + "/home",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (response.status === 200) {
+    logger.info('Successfully reached API')
+  } else {
+    logger.error('The API was reached but there was a issue')
+  }
+} catch(error) {
+  logger.error('The API could not be reached')
+}
+}
+
+testAPIConnection()
+//END of connection test
+
 
