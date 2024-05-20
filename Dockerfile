@@ -3,9 +3,9 @@ WORKDIR /app
 COPY package.json .
 COPY yarn.lock .
 COPY index.js .
-COPY var.env .env
 RUN apk update
 RUN apk add yarn
 RUN yarn install
+RUN --mount=type=secret,id=.env,required=true cp /run/secrets/.env /app/.env
 EXPOSE 3000
 ENTRYPOINT [ "yarn", "start" ]
