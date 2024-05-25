@@ -18,6 +18,7 @@ const PORT = env.PORT
 const HOST = env.HOST
 const API_SERVICE_URL = env.API_SERVICE_URL
 const FRONT_END_URL = env.FRONT_END_URL
+const PROD_FRONT_END_URL = env.PROD_FRONT_END_URL
 const secret = env.COGNITO_SECRET
 const clientId = env.COGNITO_ID
 const userPoolId = env.USER_POOL_ID
@@ -88,7 +89,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: env.FRONT_END_URL,
+    origin: [FRONT_END_URL, PROD_FRONT_END_URL],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization", "Cookie"],

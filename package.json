@@ -1,6 +1,6 @@
 {
   "name": "proxy",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Proxy for backend authentication with Cognito to secure api resources.",
   "main": "index.js",
   "author": "Tevin Deale",
