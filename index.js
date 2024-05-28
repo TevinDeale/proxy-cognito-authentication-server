@@ -89,7 +89,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: [FRONT_END_URL, PROD_FRONT_END_URL],
+    origin: [FRONT_END_URL],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
