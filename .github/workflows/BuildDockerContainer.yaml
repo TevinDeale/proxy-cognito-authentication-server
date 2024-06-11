@@ -29,6 +29,7 @@ jobs:
       - name: Build and Push Image
         run: |
           docker buildx build --rm --platform linux/amd64 \
+          --secret id=.env,src=.env \
           --file Dockerfile \
           -t tevindeale/rocketbank-middleware:latest \
           --push .
